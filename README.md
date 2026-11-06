@@ -181,11 +181,7 @@ http://localhost:8080
 
 ![Validation Error](screenshots/validation-error.png)
 
-## Автор
 
-Навчальний проєкт, виконаний у межах практичної роботи №5.
-
-**Тема:** Розробка REST-сервісу на базі фреймворку Gin та СУБД PostgreSQL.
 
 ## Висновок
 
