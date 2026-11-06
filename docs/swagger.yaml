@@ -1,0 +1,292 @@
+basePath: /api/v1
+definitions:
+  dto.CreateIncidentDTO:
+    properties:
+      description:
+        type: string
+      priority:
+        enum:
+        - low
+        - medium
+        - high
+        - critical
+        type: string
+      title:
+        maxLength: 100
+        minLength: 3
+        type: string
+    required:
+    - description
+    - priority
+    - title
+    type: object
+  dto.LoginDTO:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  dto.RegisterDTO:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 6
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  dto.UpdateStatusDTO:
+    properties:
+      status:
+        enum:
+        - open
+        - in_progress
+        - resolved
+        - closed
+        type: string
+    required:
+    - status
+    type: object
+  models.Incident:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      priority:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+      user_id:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: REST API for tracking and managing incidents.
+  title: Incident Tracker API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Login credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Login and receive JWT
+      tags:
+      - Authentication
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Registration data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RegisterDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Conflict
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register a new user
+      tags:
+      - Authentication
+  /incidents:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Incident'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get current user's incidents
+      tags:
+      - Incidents
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Incident data
+        in: body
+        name: incident
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateIncidentDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Incident'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      - BearerAuth: []
+      summary: Create a new incident
+      tags:
+      - Incidents
+  /incidents/{id}:
+    delete:
+      parameters:
+      - description: Incident ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete an incident
+      tags:
+      - Incidents
+    get:
+      parameters:
+      - description: Incident ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Incident'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get an incident by ID
+      tags:
+      - Incidents
+  /incidents/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Incident ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: New status
+        in: body
+        name: status
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateStatusDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Incident'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update incident status
+      tags:
+      - Incidents
+securityDefinitions:
+  BearerAuth:
+    description: 'Enter: Bearer followed by your JWT token.'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
